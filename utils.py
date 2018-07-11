@@ -148,13 +148,15 @@ class DownloadLinkParser(threading.Thread):
                       file=sys.stderr)
                 # exit all threads
                 os.kill(os.getpid(), signal.SIGINT)
-            finally:
-                self._pop_q.put(pop)
 
             downlink = parseDownloadLink(msg)
             if downlink:
                 self._download_q.put(downlink)
                 DownloadLinkParser.nSuccess += 1
+                pop.dele(num) # mark delete msg after successfully parsed
+                pop.rset() # delete
+
+            self._pop_q.put(pop)
 
             DownloadLinkParser.progress += 1
             printProgress(DownloadLinkParser.progress,
